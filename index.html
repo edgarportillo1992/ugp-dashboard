@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Ejecutivo UGP | Gobierno de El Salvador</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#020c1b;--card:rgba(255,255,255,0.04);--card-h:rgba(255,255,255,0.07);
+  --border:rgba(0,180,255,0.12);--border2:rgba(0,180,255,0.30);
+  --cyan:#00C8FF;--cyan2:#0090e0;--blue:#0038A8;
+  --gold:#F5700A;--gold2:#c45200;
+  --green:#00E5A0;--red:#FF4D6D;--purple:#7b61ff;
+  --muted:rgba(255,255,255,0.42);--font:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:#fff;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 8% 30%,rgba(0,56,168,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 55% 40% at 92% 8%,rgba(0,200,255,.10) 0%,transparent 50%),
+    radial-gradient(ellipse 50% 55% at 50% 92%,rgba(242,92,5,.06) 0%,transparent 50%);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,200,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.022) 1px,transparent 1px);
+  background-size:48px 48px;}
+.wrap{position:relative;z-index:1;max-width:1640px;margin:0 auto;padding:0 22px 52px;}
+
+/* ── HEADER ── */
+.header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 16px;border-bottom:1px solid var(--border);margin-bottom:20px;gap:12px;}
+.hd-logos{display:flex;align-items:center;gap:12px;}
+
+/* Gov El Salvador badge */
+.gov-badge{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 15px;backdrop-filter:blur(12px);}
+.gov-flag{font-size:22px;}
+.gov-text{font-size:11.5px;font-weight:700;color:#fff;line-height:1.25;}
+.gov-sub{font-size:9.5px;color:var(--muted);}
+
+/* CAF logo — letras oficiales */
+.caf-badge{display:flex;align-items:center;gap:10px;background:rgba(242,92,5,.06);border:1px solid rgba(242,92,5,.25);border-radius:12px;padding:9px 15px;backdrop-filter:blur(12px);}
+.caf-letters{font-size:24px;font-weight:900;font-style:italic;letter-spacing:2px;color:var(--gold);line-height:1;font-family:'Inter',sans-serif;}
+.caf-tagline{font-size:8.5px;color:rgba(245,112,10,.75);font-weight:500;line-height:1.3;max-width:90px;}
+
+.hd-center{text-align:center;flex:1;}
+.hd-title{font-size:17px;font-weight:900;letter-spacing:.5px;
+  background:linear-gradient(90deg,#fff 0%,var(--cyan) 55%,#fff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hd-sub{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-top:3px;}
+
+.hd-right{display:flex;align-items:center;gap:10px;}
+.live-chip{display:flex;align-items:center;gap:6px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.22);border-radius:20px;padding:5px 13px;font-size:10.5px;font-weight:700;color:var(--green);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,229,160,.45);}50%{box-shadow:0 0 0 5px rgba(0,229,160,0);}}
+.date-chip{font-size:10.5px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 11px;}
+.info-btn{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.22);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--cyan);cursor:pointer;font-family:var(--font);transition:all .2s;}
+.info-btn:hover{background:rgba(0,200,255,.16);}
+
+/* ── FILTER BAR ── */
+.filter-bar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:12px 18px;margin-bottom:24px;
+  backdrop-filter:blur(14px);
+}
+.filter-label{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.filter-sep{width:1px;height:24px;background:var(--border);margin:0 4px;}
+.f-tabs{display:flex;gap:4px;}
+.f-tab{background:transparent;border:1px solid var(--border);border-radius:8px;padding:5px 13px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);transition:all .2s;}
+.f-tab:hover{border-color:var(--border2);color:#fff;}
+.f-tab.active{background:rgba(0,200,255,.12);border-color:var(--cyan);color:var(--cyan);}
+.f-tab.active.gold{background:rgba(242,92,5,.12);border-color:var(--gold);color:var(--gold);}
+.f-select{background:rgba(2,12,27,.8);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:500;color:#fff;font-family:var(--font);cursor:pointer;outline:none;transition:border-color .2s;}
+.f-select:hover,select:focus{border-color:var(--border2);}
+.f-reset{margin-left:auto;background:transparent;border:1px solid rgba(255,77,109,.2);border-radius:8px;padding:5px 12px;font-size:10.5px;color:var(--red);cursor:pointer;font-family:var(--font);transition:all .2s;}
+.f-reset:hover{background:rgba(255,77,109,.08);}
+.filter-info{font-size:10px;color:var(--muted);margin-left:auto;padding:0 4px;}
+
+/* ── SECTION LABEL ── */
+.sl{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.sl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:18px 16px;backdrop-filter:blur(14px);position:relative;overflow:hidden;transition:border-color .3s,transform .2s,background .3s;cursor:default;}
+.kpi:hover{border-color:var(--border2);background:var(--card-h);transform:translateY(-2px);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.65;}
+.kpi.gd::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.kpi.gr::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.kpi.rd::before{background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.kpi-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.kpi-val{font-size:26px;font-weight:900;line-height:1;color:#fff;margin-bottom:4px;transition:color .3s;}
+.kpi-val.cy{color:var(--cyan);}
+.kpi-val.gd{color:var(--gold);}
+.kpi-val.gr{color:var(--green);}
+.kpi-ico{position:absolute;top:14px;right:14px;font-size:20px;opacity:.14;}
+.kpi-foot{font-size:10px;color:var(--muted);}
+.kpi-badge{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;margin-top:6px;padding:2px 7px;border-radius:8px;}
+.badge-gr{background:rgba(0,229,160,.1);color:var(--green);}
+.badge-yw{background:rgba(255,193,7,.1);color:#ffc107;}
+.badge-cy{background:rgba(0,200,255,.1);color:var(--cyan);}
+
+/* ── PROGRAM CARDS ── */
+.prog-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+.prog{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;backdrop-filter:blur(14px);position:relative;overflow:hidden;transition:border-color .3s;}
+.prog:hover{border-color:var(--border2);}
+.prog-cy::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.prog-gd::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.pid{font-size:9.5px;font-weight:800;letter-spacing:2px;color:var(--cyan);margin-bottom:3px;}
+.pid.gd{color:var(--gold);}
+.pname{font-size:13.5px;font-weight:800;color:#fff;line-height:1.3;max-width:76%;}
+.pstat{font-size:8.5px;font-weight:800;letter-spacing:.8px;padding:4px 10px;border-radius:9px;text-transform:uppercase;white-space:nowrap;}
+.pstat-cy{background:rgba(0,200,255,.1);color:var(--cyan);border:1px solid rgba(0,200,255,.2);}
+.pstat-gd{background:rgba(242,92,5,.1);color:var(--gold);border:1px solid rgba(242,92,5,.2);}
+.pdesc{font-size:10.5px;color:var(--muted);margin-bottom:16px;}
+.pm{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.pm-item label{font-size:9px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;display:block;margin-bottom:2px;}
+.pm-item span{font-size:15px;font-weight:800;color:#fff;}
+.pm-item span.cy{color:var(--cyan);}
+.pm-item span.gd{color:var(--gold);}
+.bar-row{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-bottom:5px;}
+.bar-row strong{color:#fff;font-weight:700;}
+.bar{height:5px;background:rgba(255,255,255,0.07);border-radius:6px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;transition:width 1.6s cubic-bezier(.4,0,.2,1);}
+.bar-fill-cy{background:linear-gradient(90deg,var(--cyan2),var(--cyan));}
+.bar-fill-gd{background:linear-gradient(90deg,var(--gold2),var(--gold));}
+
+/* ── CHARTS ── */
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;backdrop-filter:blur(14px);}
+.chart-box.mb{margin-bottom:24px;}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.ct{font-size:12.5px;font-weight:700;color:#fff;}
+.legend{display:flex;gap:14px;}
+.li{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted);}
+.ld{width:8px;height:8px;border-radius:50%;}
+.cv{position:relative;height:210px;}
+
+.c3{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:14px;margin-bottom:24px;}
+.c3 .cv{height:165px;}
+
+/* ── INSIGHTS ── */
+.ins-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.ins{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:16px;backdrop-filter:blur(14px);position:relative;overflow:hidden;}
+.ins-ico{font-size:26px;margin-bottom:8px;display:block;}
+.ins-lbl{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.ins-val{font-size:20px;font-weight:900;margin-bottom:3px;}
+.ins-desc{font-size:10.5px;color:var(--muted);line-height:1.5;}
+.ins-bar{height:3px;border-radius:3px;margin-top:10px;background:rgba(255,255,255,.06);}
+.ins-bar-fill{height:100%;border-radius:3px;transition:width 1.4s ease;}
+
+/* ── BOTTOM ROW ── */
+.bot{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;margin-bottom:28px;}
+.tbl-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(14px);overflow:hidden;}
+.dt{width:100%;border-collapse:collapse;font-size:11.5px;}
+.dt th{text-align:left;padding:7px 9px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.dt td{padding:8px 9px;border-bottom:1px solid rgba(255,255,255,.035);color:rgba(255,255,255,.85);}
+.dt tr:last-child td{border-bottom:none;}
+.dt tr:hover td{background:rgba(255,255,255,.025);}
+.pill{font-size:8.5px;font-weight:700;padding:2px 7px;border-radius:7px;}
+.p-gr{background:rgba(0,229,160,.1);color:var(--green);}
+.p-cy{background:rgba(0,200,255,.1);color:var(--cyan);}
+.p-gd{background:rgba(242,92,5,.1);color:var(--gold);}
+
+/* ── CONNECT MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(2,8,20,.85);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:#040f22;border:1px solid var(--border2);border-radius:20px;padding:32px;max-width:620px;width:92%;position:relative;max-height:85vh;overflow-y:auto;}
+.modal h2{font-size:18px;font-weight:800;margin-bottom:6px;color:#fff;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
+.opt-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;}
+.opt-card h3{font-size:12.5px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.opt-card p{font-size:11.5px;color:var(--muted);line-height:1.6;}
+.opt-card code{font-size:11px;background:rgba(0,200,255,.08);color:var(--cyan);padding:2px 6px;border-radius:4px;font-family:monospace;}
+.opt-best{border-color:rgba(0,229,160,.28);background:rgba(0,229,160,.04);}
+.modal-close{position:absolute;top:16px;right:18px;background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
+.modal-close:hover{color:#fff;}
+.tag-rec{background:rgba(0,229,160,.12);color:var(--green);font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 7px;border-radius:6px;}
+
+/* ── FOOTER ── */
+.foot{border-top:1px solid var(--border);padding-top:18px;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.kpi,.prog,.chart-box,.ins,.tbl-card{animation:fadeUp .55s ease both;}
+.kpi:nth-child(1){animation-delay:.04s;}.kpi:nth-child(2){animation-delay:.09s;}
+.kpi:nth-child(3){animation-delay:.14s;}.kpi:nth-child(4){animation-delay:.19s;}
+.kpi:nth-child(5){animation-delay:.24s;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="hd-logos">
+    <div class="gov-badge">
+      <span class="gov-flag">🇸🇻</span>
+      <div>
+        <div class="gov-text">Gobierno de El Salvador</div>
+        <div class="gov-sub">UGP — Unidad Gestora de Proyectos</div>
+      </div>
+    </div>
+  </div>
+  <div class="hd-center">
+    <div class="hd-title">DASHBOARD EJECUTIVO — UGP</div>
+    <div class="hd-sub">Visibilidad Financiera de Portafolio &nbsp;·&nbsp; Cooperación CAF</div>
+  </div>
+  <div class="hd-right">
+    <div class="caf-badge">
+      <div>
+        <div class="caf-letters">CAF</div>
+        <div class="caf-tagline">banco de desarrollo<br>de América Latina</div>
+      </div>
+    </div>
+    <div class="live-chip"><div class="live-dot"></div>ACTIVO</div>
+    <div class="date-chip">30 Mar 2026</div>
+    <button class="info-btn" onclick="document.getElementById('modal').classList.add('open')">⚡ Conectar datos</button>
+  </div>
+</div>
+
+<!-- ═══ FILTER BAR ═══ -->
+<div class="filter-bar">
+  <span class="filter-label">Programa</span>
+  <div class="f-tabs" id="tabPrograma">
+    <button class="f-tab active" data-val="all">Todos</button>
+    <button class="f-tab" data-val="cfa12061">CFA12061</button>
+    <button class="f-tab gold" data-val="cfa12205">CFA12205</button>
+  </div>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Período</span>
+  <div class="f-tabs" id="tabPeriodo">
+    <button class="f-tab active" data-val="all">Todo</button>
+    <button class="f-tab" data-val="2024">2024</button>
+    <button class="f-tab" data-val="2025">2025</button>
+    <button class="f-tab" data-val="2026">2026</button>
+  </div>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Estado</span>
+  <select class="f-select" id="selEstado">
+    <option value="all">Todos los estados</option>
+    <option value="pagado">Pago completo</option>
+    <option value="contratado">Contratado</option>
+    <option value="pendiente">Pendiente / Requerida</option>
+  </select>
+  <button class="f-reset" onclick="resetFilters()">✕ Limpiar</button>
+  <span class="filter-info" id="filterInfo"></span>
+</div>
+
+<!-- ═══ KPIs ═══ -->
+<div class="sl">Indicadores Clave del Portafolio</div>
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="kpi-ico">💼</div>
+    <div class="kpi-lbl">Portafolio Total</div>
+    <div class="kpi-val cy" id="kv-total">—</div>
+    <div class="kpi-foot">monto contratado activo</div>
+    <div class="kpi-badge badge-cy">2 programas CAF</div>
+  </div>
+  <div class="kpi gd">
+    <div class="kpi-ico">✅</div>
+    <div class="kpi-lbl">Monto Ejecutado</div>
+    <div class="kpi-val gd" id="kv-exec">—</div>
+    <div class="kpi-foot">pagos liquidados acumulados</div>
+    <div class="kpi-badge badge-yw" id="kv-exec-pct">—</div>
+  </div>
+  <div class="kpi gr">
+    <div class="kpi-ico">📊</div>
+    <div class="kpi-lbl">% Ejecución Global</div>
+    <div class="kpi-val gr" id="kv-pct">—</div>
+    <div class="kpi-foot">sobre monto contratado</div>
+    <div class="kpi-badge badge-gr" id="kv-pct-badge">—</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-ico">⚡</div>
+    <div class="kpi-lbl">Ciclo de Pago Prom.</div>
+    <div class="kpi-val cy" id="kv-ciclo">—</div>
+    <div class="kpi-foot">días factura → liquidación</div>
+    <div class="kpi-badge badge-gr">✓ Eficiencia operativa</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-ico">🏢</div>
+    <div class="kpi-lbl">Proveedores / Procesos</div>
+    <div class="kpi-val" id="kv-sup">—</div>
+    <div class="kpi-foot" id="kv-procs">—</div>
+    <div class="kpi-badge badge-cy">6 países de origen</div>
+  </div>
+</div>
+
+<!-- ═══ PROGRAM CARDS ═══ -->
+<div class="sl">Ejecución por Programa</div>
+<div class="prog-grid" id="prog-grid">
+  <div class="prog prog-cy" id="prog-12061">
+    <div class="ph">
+      <div><div class="pid">CFA12061</div><div class="pname">Transformación Digital del Clima de Negocios</div></div>
+      <div class="pstat pstat-cy">En Ejecución</div>
+    </div>
+    <div class="pdesc">Facilitación del comercio e inversiones · Digitalización gubernamental · Simplificación de trámites</div>
+    <div class="pm">
+      <div class="pm-item"><label>Total</label><span class="cy">$36.8M</span></div>
+      <div class="pm-item"><label>Ejecutado</label><span>$18.1M</span></div>
+      <div class="pm-item"><label>Procesos</label><span>21</span></div>
+      <div class="pm-item"><label>Ciclo pago</label><span class="cy">14.4 días</span></div>
+    </div>
+    <div class="bar-row"><span>Ejecución Financiera</span><strong>49.2%</strong></div>
+    <div class="bar"><div class="bar-fill bar-fill-cy" id="bar1" style="width:0%"></div></div>
+  </div>
+  <div class="prog prog-gd" id="prog-12205">
+    <div class="ph">
+      <div><div class="pid gd">CFA12205</div><div class="pname">Sistema Nacional de Telemedicina</div></div>
+      <div class="pstat pstat-gd">Fase Avanzada</div>
+    </div>
+    <div class="pdesc">Implementación de telemedicina · Digitalización del sector salud · 3 componentes estratégicos</div>
+    <div class="pm">
+      <div class="pm-item"><label>Total</label><span class="gd">$73.7M</span></div>
+      <div class="pm-item"><label>Ejecutado</label><span>$67.0M</span></div>
+      <div class="pm-item"><label>Procesos</label><span>96</span></div>
+      <div class="pm-item"><label>Ciclo pago</label><span class="gd">21.8 días</span></div>
+    </div>
+    <div class="bar-row"><span>Ejecución Financiera</span><strong>90.9%</strong></div>
+    <div class="bar"><div class="bar-fill bar-fill-gd" id="bar2" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- ═══ TREND CHART ═══ -->
+<div class="sl">Tendencia de Desembolsos Mensuales</div>
+<div class="chart-box mb">
+  <div class="ch">
+    <div class="ct" id="trendTitle">Desembolsos Mensuales — Todo el período</div>
+    <div class="legend">
+      <div class="li" id="leg1"><div class="ld" style="background:#00C8FF"></div>CFA12061</div>
+      <div class="li" id="leg2"><div class="ld" style="background:#F5700A"></div>CFA12205</div>
+      <div class="li"><div class="ld" style="background:rgba(255,255,255,.35);width:14px;height:2px;border-radius:2px;"></div>Total</div>
+    </div>
+  </div>
+  <div class="cv"><canvas id="trendChart"></canvas></div>
+</div>
+
+<!-- ═══ DONUTS + SUPPLIERS ═══ -->
+<div class="sl">Distribución Financiera y Proveedores</div>
+<div class="c3">
+  <div class="chart-box"><div class="ch"><div class="ct" id="d1title">Estado — CFA12061</div></div><div class="cv"><canvas id="donut1"></canvas></div></div>
+  <div class="chart-box"><div class="ch"><div class="ct" id="d2title">Estado — CFA12205</div></div><div class="cv"><canvas id="donut2"></canvas></div></div>
+  <div class="chart-box"><div class="ch"><div class="ct">Top 8 Proveedores (Portafolio)</div></div><div class="cv" style="height:195px;"><canvas id="suppChart"></canvas></div></div>
+</div>
+
+<!-- ═══ BUSINESS ANALYST INSIGHTS ═══ -->
+<div class="sl">Análisis Financiero Avanzado — Visión BA</div>
+<div class="ins-grid">
+  <div class="ins">
+    <span class="ins-ico">🔥</span>
+    <div class="ins-lbl">Burn Rate Combinado</div>
+    <div class="ins-val" style="color:var(--cyan)" id="ins-burn">$1.73M<span style="font-size:13px;font-weight:400;color:var(--muted)">/mes</span></div>
+    <div class="ins-desc">Ritmo promedio últimos 3 meses.<br>CFA12061: $815K · CFA12205: $914K</div>
+    <div class="ins-bar"><div class="ins-bar-fill" style="width:68%;background:var(--cyan)"></div></div>
+  </div>
+  <div class="ins">
+    <span class="ins-ico">⚠️</span>
+    <div class="ins-lbl">Concentración Proveedor</div>
+    <div class="ins-val" style="color:var(--gold)">83.7%</div>
+    <div class="ins-desc">Top 3 proveedores concentran 83.7% del CFA12061. Riesgo alto de dependencia operativa.</div>
+    <div class="ins-bar"><div class="ins-bar-fill" style="width:83.7%;background:var(--gold)"></div></div>
+  </div>
+  <div class="ins">
+    <span class="ins-ico">🌍</span>
+    <div class="ins-lbl">Gasto Local vs Externo</div>
+    <div class="ins-val" style="color:var(--green)">77.4% <span style="font-size:13px;font-weight:400;color:var(--muted)">local</span></div>
+    <div class="ins-desc">$28.5M en proveedores salvadoreños. Salida de divisas al exterior: $8.3M (22.6%).</div>
+    <div class="ins-bar"><div class="ins-bar-fill" style="width:77.4%;background:var(--green)"></div></div>
+  </div>
+  <div class="ins">
+    <span class="ins-ico">📅</span>
+    <div class="ins-lbl">Proyección de Cierre</div>
+    <div class="ins-val" style="color:var(--red)" id="ins-proj">~14.7 meses</div>
+    <div class="ins-desc">$25.4M pendientes a ritmo actual de $1.73M/mes. Estimado: Jun 2027.</div>
+    <div class="ins-bar"><div class="ins-bar-fill" style="width:23%;background:var(--red)"></div></div>
+  </div>
+</div>
+
+<!-- ═══ BOTTOM ROW ═══ -->
+<div class="sl">Detalle de Procesos y Distribución Geográfica</div>
+<div class="bot">
+  <div class="tbl-card">
+    <div class="ch" style="margin-bottom:12px;"><div class="ct">Top Procesos por Monto — CFA12061</div></div>
+    <table class="dt">
+      <thead><tr><th>Proceso</th><th>Monto</th><th>%</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td style="max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Transformación Digital — Desarrollo e Implementación</td><td>$15.6M</td><td>42.3%</td><td><span class="pill p-cy">Contratado</span></td></tr>
+        <tr><td>Servicios de Nube Pública para Aplicativos Gov.</td><td>$3.9M</td><td>10.5%</td><td><span class="pill p-gr">Pago completo</span></td></tr>
+        <tr><td>Prórroga Nube Pública (Continuidad)</td><td>$3.8M</td><td>10.3%</td><td><span class="pill p-gr">Pago completo</span></td></tr>
+        <tr><td>Outsourcing Servicios Profesionales UGP</td><td>$3.8M</td><td>10.2%</td><td><span class="pill p-cy">Contratado</span></td></tr>
+        <tr><td>Prórroga Outsourcing Servicios Profesionales</td><td>$3.8M</td><td>10.2%</td><td><span class="pill p-cy">Contratado</span></td></tr>
+        <tr><td>Compra de Equipos Informáticos</td><td>$2.8M</td><td>7.6%</td><td><span class="pill p-gr">Pago completo</span></td></tr>
+        <tr><td>Sistemas Informáticos Municipalidad Zacatecoluca</td><td>$1.5M</td><td>4.1%</td><td><span class="pill p-gr">Pago completo</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="chart-box" style="flex:1;">
+      <div class="ch"><div class="ct">País de Origen — CFA12061</div></div>
+      <div class="cv" style="height:135px;"><canvas id="geoChart"></canvas></div>
+    </div>
+    <div class="chart-box" style="flex:1;">
+      <div class="ch"><div class="ct">Componentes — CFA12205</div></div>
+      <div class="cv" style="height:120px;"><canvas id="compChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="foot">
+  <div>🇸🇻 Gobierno de El Salvador &nbsp;·&nbsp; UGP — Unidad Gestora de Proyectos &nbsp;·&nbsp; Cooperación <strong style="color:var(--gold)">CAF</strong> &nbsp;·&nbsp; Dashboard generado con IA</div>
+  <div>BASE DE PAGOS C1 &nbsp;·&nbsp; Actualizado: 30 Marzo 2026</div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- ═══════════════════════════════════════════════
+     MODAL — CÓMO CONECTAR DATOS EN VIVO
+═══════════════════════════════════════════════ -->
+<div class="modal-bg" id="modal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal">
+  <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">✕</button>
+  <h2>⚡ ¿Cómo mantener el dashboard actualizado?</h2>
+  <p class="modal-sub">Tres opciones según tu nivel de automatización deseado. Te recomendamos la Opción B para empezar.</p>
+
+  <div class="opt-card opt-best">
+    <h3>✅ Opción A — Actualización con tu Excel <span class="tag-rec">RECOMENDADO HOY</span></h3>
+    <p>Cada vez que tengas datos nuevos, <strong>comparte el Excel actualizado</strong> en este chat. En minutos recibes el dashboard regenerado con los nuevos números, gráficas y KPIs. Cero código, cero configuración. <br><br>
+    <strong>Ventaja:</strong> Inmediato, confiable, sin depender de conexiones externas.<br>
+    <strong>Uso ideal:</strong> Reportes mensuales o quincenales a directivos.</p>
+  </div>
+
+  <div class="opt-card">
+    <h3>🔗 Opción B — Google Sheets en vivo (ya configurado en el código)</h3>
+    <p>El código ya está preparado. Solo necesitas dos pasos:<br><br>
+    1. Abre tu Google Sheet → <strong>Compartir</strong> → "Cualquier persona con el enlace" → <strong>Lector</strong><br>
+    2. En el archivo HTML, busca la línea <code>LIVE_DATA: false</code> y cámbiala a <code>LIVE_DATA: true</code><br><br>
+    Luego, cada vez que alguien abra el dashboard, <strong>el navegador lee los datos frescos de tu hoja automáticamente</strong>. Tú solo actualizas la hoja y el dashboard refleja los cambios.<br><br>
+    <strong>Requiere:</strong> Hoja pública de solo lectura + abrir el HTML desde un servidor (no desde archivo local).</p>
+  </div>
+
+  <div class="opt-card">
+    <h3>🏢 Opción C — Despliegue web con actualización automática</h3>
+    <p>Para uso corporativo continuo. Publica el HTML en <strong>GitHub Pages</strong> o <strong>Netlify</strong> (gratis), conectado a tu Google Sheet pública.<br><br>
+    El dashboard tendrá una URL fija que cualquier directivo puede visitar desde el celular o PC, siempre con datos actualizados.<br><br>
+    <strong>Pasos:</strong> Sube el HTML a GitHub → activa GitHub Pages → comparte el link.<br>
+    <code>https://tuorg.github.io/ugp-dashboard</code><br><br>
+    Puedo guiarte paso a paso cuando quieras avanzar a esta opción.</p>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT — DATOS Y LÓGICA
+═══════════════════════════════════════════════ -->
+<script>
+// ─── CONFIGURACIÓN ───────────────────────────────────
+const CONFIG = {
+  SHEET_ID: '1NGXdtn3nTQh7JVlpcesIh2qvo8TDAX-d3UDZxJ9vI6g',
+  LIVE_DATA: false  // ← true cuando hoja sea pública
+};
+
+// ─── DATOS COMPLETOS POR PROGRAMA Y PERÍODO ──────────
+const DB = {
+  all: {
+    total:110569833, ejecutado:85135213, pct:77.1,
+    ciclo:18.1, sup:84, procs:117
+  },
+  cfa12061: {
+    total:36830031, ejecutado:18116746, pct:49.2,
+    ciclo:14.4, sup:27, procs:21
+  },
+  cfa12205: {
+    total:73739802, ejecutado:67019191, pct:90.9,
+    ciclo:21.8, sup:57, procs:96
+  },
+
+  // ── MONTHLY DATA ───────────────────────────────────
+  monthly: {
+    // Etiquetas para cada período
+    labels: {
+      all:  ['Feb 24','Mar 24','Abr 24','May 24','Jun 24','Jul 24','Ago 24','Sep 24','Oct 24','Nov 24','Dic 24',
+             'Ene 25','Feb 25','Mar 25','Abr 25','May 25','Jun 25','Jul 25','Ago 25','Sep 25','Oct 25','Nov 25','Dic 25',
+             'Ene 26','Feb 26','Mar 26'],
+      '2024': ['Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+      '2025': ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+      '2026': ['Ene','Feb','Mar']
+    },
+    cfa12061: {
+      all:  [20000,78750,882530,127754,38205,3987510,170061,144046,8198555,1624600,1642459,
+             0,456473,421817,1246652,488022,1328809,3377856,3453708,1069141,2805741,1001158,1433171,
+             511156,1861602,76284],
+      '2024': [20000,78750,882530,127754,38205,3987510,170061,144046,8198555,1624600,1642459],
+      '2025': [0,456473,421817,1246652,488022,1328809,3377856,3453708,1069141,2805741,1001158,1433171],
+      '2026': [511156,1861602,76284]
+    },
+    cfa12205: {
+      all:  [0,0,0,0,0,0,3200000,4100000,8500000,6200000,7100000,
+             406478,809320,2079834,1556883,2486046,1530140,3073018,7863469,3131659,6447715,4128363,4786531,
+             1385291,1338981,21550],
+      '2024': [0,0,0,0,0,0,3200000,4100000,8500000,6200000,7100000],
+      '2025': [406478,809320,2079834,1556883,2486046,1530140,3073018,7863469,3131659,6447715,4128363,4786531],
+      '2026': [1385291,1338981,21550]
+    }
+  },
+
+  // ── STATUS ─────────────────────────────────────────
+  status12061: {'Pago completo':18116023,'Contratado':18670219,'Requerida':43790},
+  status12205: {'Pago completo':67019191,'Contratado':73739802,'Aprobado CAF':77000000},
+
+  // ── STATUS FILTERED ────────────────────────────────
+  statusPagado12061:   {'Pago completo':18116023},
+  statusPagado12205:   {'Pago completo':67019191},
+  statusContratado12061: {'Contratado':18670219},
+  statusContratado12205: {'Contratado':73739802},
+  statusPendiente12061: {'Requerida':43790},
+  statusPendiente12205: {'Aprobado CAF':77000000},
+
+  // ── SUPPLIERS ──────────────────────────────────────
+  suppliers: {
+    all: {
+      labels:['Tech Solutions ES','Manpower ES','Google LLC','Const. Durán Vázquez','Two Shows Prod.','Jorge Munoz Inv.','Omnivida SAS','Com. Innovativas'],
+      vals:  [65527006,33712944,28627251,10079647,7532623,4266561,3795714,2800000]
+    },
+    cfa12061: {
+      labels:['Tech Solutions ES','Google LLC','Two Shows Prod.','Com. Innovativas','Tecnologías 101','CATIE','P. Caro Oyarzún','A. Molina García'],
+      vals:  [15559227,7661969,7532623,2800000,1850000,300000,183060,126000]
+    },
+    cfa12205: {
+      labels:['Tech Solutions ES','Manpower ES','Google LLC','Const. Durán Vázquez','Jorge Munoz Inv.','Omnivida SAS','ECSSA El Salvador','Yingyang Intl.'],
+      vals:  [49967779,33712944,20965282,10079647,4266561,3795714,3728594,3650000]
+    }
+  },
+
+  // ── GEOGRAPHIC ─────────────────────────────────────
+  paises: {
+    labels:['El Salvador','Estados Unidos','Costa Rica','Chile','Rep. Dominicana','ES / EEUU'],
+    vals:  [28486119,7675894,300000,212760,100000,55219]
+  },
+
+  // ── COMPONENTS 12205 ──────────────────────────────
+  componentes: {
+    labels:['Componente I','Componente II','Componente III'],
+    vals:  [135182437,4187555,1389000]
+  }
+};
+
+// ─── ESTADO DE FILTROS ───────────────────────────────
+let F = { programa:'all', periodo:'all', estado:'all' };
+
+// ─── CHART.JS DEFAULTS ───────────────────────────────
+Chart.defaults.color = 'rgba(255,255,255,0.48)';
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.font.size = 10.5;
+
+const CY='#00C8FF', GD='#F5700A', GR='#00E5A0', RD='#FF4D6D';
+const TCFG = {
+  backgroundColor:'rgba(4,16,34,.95)',
+  borderColor:'rgba(0,200,255,.28)',
+  borderWidth:1,
+  padding:{top:8,right:12,bottom:8,left:12}
+};
+
+// ─── CHART INSTANCES ─────────────────────────────────
+let charts = {};
+
+// ─── HELPERS ─────────────────────────────────────────
+function fmt(n){
+  if(n>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+  if(n>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
+  return '$'+Math.round(n);
+}
+function animNum(el, target, prefix='', suffix='', dur=1400){
+  let cur=0, steps=55, step=target/steps;
+  const t=setInterval(()=>{
+    cur=Math.min(cur+step, target);
+    if(target>=1e6) el.textContent=prefix+(cur/1e6).toFixed(1)+'M'+suffix;
+    else if(target>=1e3) el.textContent=prefix+(cur/1e3).toFixed(0)+'K'+suffix;
+    else el.textContent=prefix+Math.round(cur)+suffix;
+    if(cur>=target) clearInterval(t);
+  }, dur/steps);
+}
+
+// ─── GET FILTERED DATA ───────────────────────────────
+function getStatusData(prog){
+  const estMap = {
+    all:       {cfa12061: DB.status12061, cfa12205: DB.status12205},
+    pagado:    {cfa12061: DB.statusPagado12061, cfa12205: DB.statusPagado12205},
+    contratado:{cfa12061: DB.statusContratado12061, cfa12205: DB.statusContratado12205},
+    pendiente: {cfa12061: DB.statusPendiente12061, cfa12205: DB.statusPendiente12205}
+  };
+  return estMap[F.estado][prog];
+}
+function getMonthlyData(){
+  const per = F.periodo;
+  const prog = F.programa;
+  const labels = DB.monthly.labels[per] || DB.monthly.labels.all;
+  const d61 = DB.monthly.cfa12061[per] || DB.monthly.cfa12061.all;
+  const d05 = DB.monthly.cfa12205[per] || DB.monthly.cfa12205.all;
+  return {labels, d61, d05};
+}
+function getKPIs(){
+  const kd = (F.programa==='all') ? DB.all
+           : (F.programa==='cfa12061') ? DB.cfa12061 : DB.cfa12205;
+  return kd;
+}
+function getSuppliers(){
+  return DB.suppliers[F.programa] || DB.suppliers.all;
+}
+
+// ─── UPDATE KPIs ─────────────────────────────────────
+function updateKPIs(){
+  const k = getKPIs();
+  animNum(document.getElementById('kv-total'), k.total, '$');
+  animNum(document.getElementById('kv-exec'), k.ejecutado, '$');
+  document.getElementById('kv-pct').textContent = k.pct+'%';
+  document.getElementById('kv-ciclo').textContent = k.ciclo+' días';
+  document.getElementById('kv-sup').textContent = k.sup+' prov.';
+  document.getElementById('kv-procs').textContent = k.procs+' procesos activos';
+  document.getElementById('kv-exec-pct').textContent = '▲ '+k.pct+'% ejecutado';
+  document.getElementById('kv-pct-badge').textContent = k.pct>=75 ? '✓ Meta avanzada' : k.pct>=50 ? '~ En progreso' : '↗ Acelerando';
+}
+
+// ─── UPDATE TREND ─────────────────────────────────────
+function updateTrend(){
+  const {labels, d61, d05} = getMonthlyData();
+  const combined = d61.map((v,i)=>v+(d05[i]||0));
+  const prog = F.programa;
+  const tc = charts.trend;
+  tc.data.labels = labels;
+  const s0=tc.data.datasets[0], s1=tc.data.datasets[1], s2=tc.data.datasets[2];
+  s0.data = d61; s0.hidden = (prog==='cfa12205');
+  s1.data = d05; s1.hidden = (prog==='cfa12061');
+  s2.data = combined; s2.hidden = (prog!=='all');
+  tc.update('active');
+  // legend visibility
+  document.getElementById('leg1').style.opacity = prog==='cfa12205' ? '.25' : '1';
+  document.getElementById('leg2').style.opacity = prog==='cfa12061' ? '.25' : '1';
+  // title
+  const periodLabel = F.periodo==='all' ? 'Todo el período' : F.periodo;
+  const progLabel = prog==='all' ? 'Ambos programas' : prog.toUpperCase();
+  document.getElementById('trendTitle').textContent = `Desembolsos Mensuales — ${progLabel} / ${periodLabel}`;
+}
+
+// ─── UPDATE DONUTS ────────────────────────────────────
+function updateDonuts(){
+  const prog = F.programa;
+  const show61 = prog==='all' || prog==='cfa12061';
+  const show05 = prog==='all' || prog==='cfa12205';
+  const d1 = document.getElementById('donut1').parentElement.parentElement;
+  const d2 = document.getElementById('donut2').parentElement.parentElement;
+  d1.style.opacity = show61 ? '1' : '.25';
+  d2.style.opacity = show05 ? '1' : '.25';
+
+  const sd61 = getStatusData('cfa12061');
+  const sd05 = getStatusData('cfa12205');
+  charts.donut1.data.labels = Object.keys(sd61);
+  charts.donut1.data.datasets[0].data = Object.values(sd61);
+  charts.donut1.update('active');
+  charts.donut2.data.labels = Object.keys(sd05);
+  charts.donut2.data.datasets[0].data = Object.values(sd05);
+  charts.donut2.update('active');
+}
+
+// ─── UPDATE SUPPLIERS ────────────────────────────────
+function updateSuppliers(){
+  const s = getSuppliers();
+  charts.supp.data.labels = s.labels;
+  charts.supp.data.datasets[0].data = s.vals;
+  charts.supp.update('active');
+}
+
+// ─── FILTER INFO STRING ──────────────────────────────
+function updateFilterInfo(){
+  const parts=[];
+  if(F.programa!=='all') parts.push(F.programa.toUpperCase());
+  if(F.periodo!=='all') parts.push('Año '+F.periodo);
+  if(F.estado!=='all') parts.push({pagado:'Pago completo',contratado:'Contratado',pendiente:'Pendiente'}[F.estado]);
+  document.getElementById('filterInfo').textContent = parts.length ? '↳ Filtrando por: '+parts.join(' · ') : '';
+}
+
+// ─── APPLY ALL FILTERS ───────────────────────────────
+function applyFilters(){
+  updateKPIs();
+  updateTrend();
+  updateDonuts();
+  updateSuppliers();
+  updateFilterInfo();
+  // Progress bars
+  const k = getKPIs();
+  setTimeout(()=>{ document.getElementById('bar1').style.width=(F.programa==='cfa12205'?'0':'49.2')+'%'; },100);
+  setTimeout(()=>{ document.getElementById('bar2').style.width=(F.programa==='cfa12061'?'0':'90.9')+'%'; },150);
+  // Dim program cards
+  const p61=document.getElementById('prog-12061'), p05=document.getElementById('prog-12205');
+  p61.style.opacity = F.programa==='cfa12205' ? '.3' : '1';
+  p05.style.opacity = F.programa==='cfa12061' ? '.3' : '1';
+}
+
+function resetFilters(){
+  F = {programa:'all', periodo:'all', estado:'all'};
+  document.querySelectorAll('#tabPrograma .f-tab').forEach(b=>b.classList.toggle('active',b.dataset.val==='all'));
+  document.querySelectorAll('#tabPeriodo .f-tab').forEach(b=>b.classList.toggle('active',b.dataset.val==='all'));
+  document.getElementById('selEstado').value='all';
+  applyFilters();
+}
+
+// ─── CHART BUILDERS ──────────────────────────────────
+function buildTrend(){
+  const {labels, d61, d05} = getMonthlyData();
+  const combined = d61.map((v,i)=>v+(d05[i]||0));
+  charts.trend = new Chart(document.getElementById('trendChart'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'CFA12061',data:d61,backgroundColor:'rgba(0,200,255,.52)',borderColor:CY,borderWidth:1,borderRadius:3,order:2},
+        {label:'CFA12205',data:d05,backgroundColor:'rgba(242,112,10,.52)',borderColor:GD,borderWidth:1,borderRadius:3,order:2},
+        {label:'Total',data:combined,type:'line',borderColor:'rgba(255,255,255,.3)',backgroundColor:'rgba(255,255,255,.03)',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#fff',fill:false,tension:.4,order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{...TCFG,callbacks:{label:c=>' '+c.dataset.label+': '+fmt(c.raw)}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:9.5}}},
+        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>fmt(v),font:{size:9.5}}}
+      }
+    }
+  });
+}
+
+function buildDonut(id, data, colors){
+  return new Chart(document.getElementById(id),{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(data),
+      datasets:[{data:Object.values(data),backgroundColor:colors,borderColor:'#040f20',borderWidth:2,hoverOffset:5}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'66%',
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:9,padding:9,font:{size:9.5}}},
+        tooltip:{...TCFG,callbacks:{label:c=>' '+c.label+': '+fmt(c.raw)}}
+      }
+    }
+  });
+}
+
+function buildSuppliers(){
+  const s = getSuppliers();
+  charts.supp = new Chart(document.getElementById('suppChart'),{
+    type:'bar',
+    data:{
+      labels:s.labels,
+      datasets:[{label:'Monto',data:s.vals,
+        backgroundColor:s.vals.map((_,i)=>`rgba(${i<2?'0,180,255':'0,'+Math.round(160-i*8)+','+Math.round(220-i*12)},0.72)`),
+        borderWidth:1,borderRadius:3}]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...TCFG,callbacks:{label:c=>' '+fmt(c.raw)}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>fmt(v),font:{size:9}}},
+        y:{grid:{display:false},ticks:{font:{size:9.5}}}
+      }
+    }
+  });
+}
+
+function buildGeo(){
+  charts.geo = new Chart(document.getElementById('geoChart'),{
+    type:'doughnut',
+    data:{
+      labels:DB.paises.labels,
+      datasets:[{data:DB.paises.vals,
+        backgroundColor:['rgba(0,200,255,.78)','rgba(242,112,10,.78)','rgba(0,229,160,.72)','rgba(123,97,255,.72)','rgba(255,77,109,.72)','rgba(54,211,153,.72)'],
+        borderColor:'#040f20',borderWidth:2,hoverOffset:4}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'52%',
+      plugins:{
+        legend:{position:'right',labels:{boxWidth:8,padding:7,font:{size:9}}},
+        tooltip:{...TCFG,callbacks:{label:c=>' '+c.label+': '+fmt(c.raw)+' ('+(c.raw/36830031*100).toFixed(1)+'%)'}}
+      }
+    }
+  });
+}
+
+function buildComp(){
+  charts.comp = new Chart(document.getElementById('compChart'),{
+    type:'bar',
+    data:{
+      labels:DB.componentes.labels,
+      datasets:[{data:DB.componentes.vals,
+        backgroundColor:['rgba(242,112,10,.78)','rgba(0,200,255,.72)','rgba(0,229,160,.72)'],
+        borderColor:['rgba(242,112,10,1)','rgba(0,200,255,1)','rgba(0,229,160,1)'],
+        borderWidth:1,borderRadius:5}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...TCFG,callbacks:{label:c=>' '+fmt(c.raw)}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>fmt(v),font:{size:9.5}}}
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// CONEXIÓN EN VIVO — GOOGLE SHEETS
+// Actívala cambiando LIVE_DATA: true en CONFIG arriba
+// y asegurando que tu hoja sea pública (solo lectura)
+// ═══════════════════════════════════════════════════════
+
+async function fetchGviz(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res = await fetch(url);
+  const txt = await res.text();
+  const match = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
+  if (!match) throw new Error('gviz parse error para: ' + sheetName);
+  return JSON.parse(match[1]).table;
+}
+
+function parseRows(table) {
+  const cols = (table.cols || []).map(c => c.label);
+  return (table.rows || []).map(row => {
+    const obj = {};
+    (row.c || []).forEach((cell, i) => {
+      let val = cell ? cell.v : null;
+      if (typeof val === 'string' && val.startsWith('Date(')) {
+        const p = val.replace('Date(','').replace(')','').split(',');
+        val = new Date(+p[0], +p[1], +p[2]);
+      }
+      obj[cols[i]] = val;
+    });
+    return obj;
+  });
+}
+
+function computeLiveKPIs(rows61, rows05) {
+  const sumBy = (rows, field, filter) =>
+    rows.filter(r => !filter || filter(r)).reduce((s,r) => s + (parseFloat(r[field])||0), 0);
+
+  const groupByMonth = (rows, field='Monto (US$)') => {
+    const m = {};
+    rows.forEach(r => {
+      const d = r['Mes'] instanceof Date ? r['Mes'] : new Date(r['Mes']);
+      if (isNaN(d)) return;
+      const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      m[k] = (m[k]||0) + (parseFloat(r[field])||0);
+    });
+    return m;
+  };
+
+  // ── CFA12061 ──
+  const total61    = sumBy(rows61,'Monto (US$)');
+  const pagado61   = sumBy(rows61,'Monto (US$)', r=>r['Estado']==='Pago completo');
+  const contrat61  = sumBy(rows61,'Monto (US$)', r=>r['Estado']==='Contratado');
+  const req61      = sumBy(rows61,'Monto (US$)', r=>r['Estado']==='Requerida');
+
+  let cs61=0,cc61=0;
+  rows61.forEach(r=>{
+    const mes=r['Mes'] instanceof Date?r['Mes']:new Date(r['Mes']);
+    const liq=r['Fecha_liquido'] instanceof Date?r['Fecha_liquido']:new Date(r['Fecha_liquido']);
+    if(!isNaN(mes)&&!isNaN(liq)){const d=(liq-mes)/86400000;if(d>=0&&d<365){cs61+=d;cc61++;}}
+  });
+  const ciclo61 = cc61>0 ? Math.round(cs61/cc61*10)/10 : 14.4;
+
+  // ── CFA12205 ──
+  const pagado05  = sumBy(rows05,'Monto (US$)', r=>r['Estado']==='Pago completo');
+  const contrat05 = sumBy(rows05,'Monto (US$)', r=>r['Estado']==='Contratado');
+  const aprobado05= sumBy(rows05,'Monto (US$)', r=>r['Estado']==='Aprobado');
+  const total05   = contrat05 || pagado05;
+
+  let cs05=0,cc05=0;
+  rows05.forEach(r=>{
+    const mes=r['Mes'] instanceof Date?r['Mes']:new Date(r['Mes']);
+    const liq=r['Fecha_liquido'] instanceof Date?r['Fecha_liquido']:new Date(r['Fecha_liquido']);
+    if(!isNaN(mes)&&!isNaN(liq)){const d=(liq-mes)/86400000;if(d>=0&&d<365){cs05+=d;cc05++;}}
+  });
+  const ciclo05 = cc05>0 ? Math.round(cs05/cc05*10)/10 : 21.8;
+
+  // ── MONTHLY TREND — últimos 24 meses ──
+  const m61 = groupByMonth(rows61);
+  const m05 = groupByMonth(rows05);
+  const now = new Date();
+  const mKeys=[], mLabels=[];
+  const mNames=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  for(let i=23;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    mKeys.push(k);
+    mLabels.push(mNames[d.getMonth()]+' '+String(d.getFullYear()).slice(2));
+  }
+
+  // ── SUPPLIERS ──
+  const sup61={}, sup05={}, supAll={};
+  rows61.forEach(r=>{if(r['Proveedor']){const v=parseFloat(r['Monto (US$)'])||0;sup61[r['Proveedor']]=(sup61[r['Proveedor']]||0)+v;supAll[r['Proveedor']]=(supAll[r['Proveedor']]||0)+v;}});
+  rows05.forEach(r=>{if(r['Proveedor']){const v=parseFloat(r['Monto (US$)'])||0;sup05[r['Proveedor']]=(sup05[r['Proveedor']]||0)+v;supAll[r['Proveedor']]=(supAll[r['Proveedor']]||0)+v;}});
+  const toTop = (obj,n=8)=>Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);
+  const fmt2 = s=>s.length>22?s.slice(0,20)+'…':s;
+
+  // ── COUNTRIES (solo CFA12061) ──
+  const paises={};
+  rows61.forEach(r=>{if(r['País de Origen']){paises[r['País de Origen']]=(paises[r['País de Origen']]||0)+(parseFloat(r['Monto (US$)'])||0);}});
+
+  // ── COMPONENTES CFA12205 ──
+  const comps={};
+  rows05.forEach(r=>{if(r['C']){const k='Componente '+r['C'];comps[k]=(comps[k]||0)+(parseFloat(r['Monto (US$)'])||0);}});
+
+  const sup61t=toTop(sup61), sup05t=toTop(sup05), supAllt=toTop(supAll);
+  const totalAll=total61+total05, execAll=pagado61+pagado05;
+
+  return {
+    all:     {total:totalAll,ejecutado:execAll,pct:Math.round(execAll/totalAll*1000)/10,ciclo:Math.round((ciclo61+ciclo05)/2*10)/10,sup:new Set([...rows61.map(r=>r['Proveedor']),...rows05.map(r=>r['Proveedor'])].filter(Boolean)).size,procs:new Set([...rows61.map(r=>r['Cod_Proc']),...rows05.map(r=>r['Cod_Proc'])].filter(Boolean)).size},
+    cfa12061:{total:total61,ejecutado:pagado61,pct:Math.round(pagado61/total61*1000)/10,ciclo:ciclo61,sup:new Set(rows61.map(r=>r['Proveedor']).filter(Boolean)).size,procs:new Set(rows61.map(r=>r['Cod_Proc']).filter(Boolean)).size},
+    cfa12205:{total:total05,ejecutado:pagado05,pct:Math.round(pagado05/(total05||1)*1000)/10,ciclo:ciclo05,sup:new Set(rows05.map(r=>r['Proveedor']).filter(Boolean)).size,procs:new Set(rows05.map(r=>r['Cod_Proc']).filter(Boolean)).size},
+    monthly:{
+      labels:{all:mLabels,'2024':mLabels.filter(l=>l.includes('24')),'2025':mLabels.filter(l=>l.includes('25')),'2026':mLabels.filter(l=>l.includes('26'))},
+      cfa12061:{all:mKeys.map(k=>m61[k]||0),'2024':mKeys.filter(k=>k.startsWith('2024')).map(k=>m61[k]||0),'2025':mKeys.filter(k=>k.startsWith('2025')).map(k=>m61[k]||0),'2026':mKeys.filter(k=>k.startsWith('2026')).map(k=>m61[k]||0)},
+      cfa12205:{all:mKeys.map(k=>m05[k]||0),'2024':mKeys.filter(k=>k.startsWith('2024')).map(k=>m05[k]||0),'2025':mKeys.filter(k=>k.startsWith('2025')).map(k=>m05[k]||0),'2026':mKeys.filter(k=>k.startsWith('2026')).map(k=>m05[k]||0)}
+    },
+    status12061:{'Pago completo':pagado61,'Contratado':contrat61,'Requerida':req61},
+    status12205:{'Pago completo':pagado05,'Contratado':contrat05,'Aprobado CAF':aprobado05},
+    statusPagado12061:   {'Pago completo':pagado61},
+    statusPagado12205:   {'Pago completo':pagado05},
+    statusContratado12061:{'Contratado':contrat61},
+    statusContratado12205:{'Contratado':contrat05},
+    statusPendiente12061: {'Requerida':req61},
+    statusPendiente12205: {'Aprobado CAF':aprobado05},
+    suppliers:{
+      all:   {labels:supAllt.map(e=>fmt2(e[0])),vals:supAllt.map(e=>e[1])},
+      cfa12061:{labels:sup61t.map(e=>fmt2(e[0])),vals:sup61t.map(e=>e[1])},
+      cfa12205:{labels:sup05t.map(e=>fmt2(e[0])),vals:sup05t.map(e=>e[1])}
+    },
+    paises:{labels:Object.keys(paises),vals:Object.values(paises)},
+    componentes:{labels:Object.keys(comps),vals:Object.values(comps)}
+  };
+}
+
+async function tryLiveData() {
+  const badge = document.querySelector('.live-chip');
+  const dateBadge = document.querySelector('.date-chip');
+  try {
+    badge.innerHTML = '<div class="live-dot" style="background:#ffc107"></div>Cargando…';
+    const [t61, t05] = await Promise.all([
+      fetchGviz('BD12061'),
+      fetchGviz('12205')
+    ]);
+    const rows61 = parseRows(t61);
+    const rows05 = parseRows(t05);
+    const computed = computeLiveKPIs(rows61, rows05);
+    // Merge live data into DB
+    Object.assign(DB, computed);
+    // Re-render with live data
+    applyFilters();
+    // Update bars
+    const k61=computed.cfa12061, k05=computed.cfa12205;
+    setTimeout(()=>{document.getElementById('bar1').style.width=k61.pct+'%';},200);
+    setTimeout(()=>{document.getElementById('bar2').style.width=k05.pct+'%';},300);
+    // Show live indicator
+    badge.innerHTML = '<div class="live-dot"></div>DATOS EN VIVO';
+    dateBadge.textContent = 'Actualizado: '+new Date().toLocaleDateString('es-SV',{day:'2-digit',month:'short',year:'numeric'});
+    console.log('✅ Google Sheets conectado correctamente.');
+  } catch(e) {
+    badge.innerHTML = '<div class="live-dot" style="background:#FF4D6D"></div>SIN CONEXIÓN';
+    console.warn('⚠️ Google Sheets no disponible. Revisa que la hoja sea pública.\nError:', e.message);
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────
+function init(){
+  // Progress bars
+  setTimeout(()=>{ document.getElementById('bar1').style.width='49.2%'; },400);
+  setTimeout(()=>{ document.getElementById('bar2').style.width='90.9%'; },500);
+
+  // KPIs initial
+  animNum(document.getElementById('kv-total'), DB.all.total, '$');
+  animNum(document.getElementById('kv-exec'),  DB.all.ejecutado, '$');
+  document.getElementById('kv-pct').textContent   = '77.1%';
+  document.getElementById('kv-ciclo').textContent = '18.1 días';
+  document.getElementById('kv-sup').textContent   = '84 prov.';
+  document.getElementById('kv-procs').textContent = '117 procesos activos';
+  document.getElementById('kv-exec-pct').textContent = '▲ 77.1% ejecutado';
+  document.getElementById('kv-pct-badge').textContent = '✓ Meta avanzada';
+
+  // Build all charts
+  buildTrend();
+  charts.donut1 = buildDonut('donut1', DB.status12061, ['rgba(0,229,160,.8)','rgba(0,200,255,.8)','rgba(255,193,7,.75)']);
+  charts.donut2 = buildDonut('donut2', DB.status12205, ['rgba(0,229,160,.8)','rgba(242,112,10,.8)','rgba(0,144,224,.72)']);
+  buildSuppliers();
+  buildGeo();
+  buildComp();
+
+  // ── TAB FILTERS ──────────────────────────────────
+  document.querySelectorAll('#tabPrograma .f-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#tabPrograma .f-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      F.programa = btn.dataset.val;
+      applyFilters();
+    });
+  });
+  document.querySelectorAll('#tabPeriodo .f-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#tabPeriodo .f-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      F.periodo = btn.dataset.val;
+      applyFilters();
+    });
+  });
+  document.getElementById('selEstado').addEventListener('change',e=>{
+    F.estado = e.target.value;
+    applyFilters();
+  });
+
+  // ── LIVE DATA (Google Sheets) ──────────────────
+  if (CONFIG.LIVE_DATA) tryLiveData();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
