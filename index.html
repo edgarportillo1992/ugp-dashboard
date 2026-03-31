@@ -908,13 +908,27 @@ function buildComp(){
 // y asegurando que tu hoja sea pública (solo lectura)
 // ═══════════════════════════════════════════════════════
 
-async function fetchGviz(sheetName) {
-  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
-  const res = await fetch(url);
-  const txt = await res.text();
-  const match = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
-  if (!match) throw new Error('gviz parse error para: ' + sheetName);
-  return JSON.parse(match[1]).table;
+function fetchGviz(sheetName) {
+  return new Promise((resolve, reject) => {
+    const cb = 'gviz_cb_' + Date.now() + '_' + Math.round(Math.random()*9999);
+    const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json;handler:${cb}&sheet=${encodeURIComponent(sheetName)}`;
+    window[cb] = function(data) {
+      try { delete window[cb]; } catch(e){}
+      if (script.parentNode) script.parentNode.removeChild(script);
+      if (data && data.table) resolve(data.table);
+      else reject(new Error('Sin datos en hoja: ' + sheetName));
+    };
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = () => {
+      try { delete window[cb]; } catch(e){}
+      reject(new Error('No se pudo cargar: ' + sheetName));
+    };
+    document.head.appendChild(script);
+    setTimeout(() => {
+      if (window[cb]) { delete window[cb]; reject(new Error('Timeout: ' + sheetName)); }
+    }, 10000);
+  });
 }
 
 function parseRows(table) {
@@ -1037,30 +1051,72 @@ function computeLiveKPIs(rows61, rows05) {
 async function tryLiveData() {
   const badge = document.querySelector('.live-chip');
   const dateBadge = document.querySelector('.date-chip');
+  badge.innerHTML = '<div class="live-dot" style="background:#ffc107"></div>Cargando…';
+
+  // Intentar cargar cada hoja por separado — si una falla, usa datos embebidos
+  let rows61 = null, rows05 = null;
+  let liveStatus = '';
+
   try {
-    badge.innerHTML = '<div class="live-dot" style="background:#ffc107"></div>Cargando…';
-    const [t61, t05] = await Promise.all([
-      fetchGviz('BD12061'),
-      fetchGviz('12205')
-    ]);
-    const rows61 = parseRows(t61);
-    const rows05 = parseRows(t05);
-    const computed = computeLiveKPIs(rows61, rows05);
-    // Merge live data into DB
-    Object.assign(DB, computed);
-    // Re-render with live data
-    applyFilters();
-    // Update bars
-    const k61=computed.cfa12061, k05=computed.cfa12205;
-    setTimeout(()=>{document.getElementById('bar1').style.width=k61.pct+'%';},200);
-    setTimeout(()=>{document.getElementById('bar2').style.width=k05.pct+'%';},300);
-    // Show live indicator
-    badge.innerHTML = '<div class="live-dot"></div>DATOS EN VIVO';
-    dateBadge.textContent = 'Actualizado: '+new Date().toLocaleDateString('es-SV',{day:'2-digit',month:'short',year:'numeric'});
-    console.log('✅ Google Sheets conectado correctamente.');
+    const t61 = await fetchGviz('BD12061');
+    rows61 = parseRows(t61);
+    console.log('✅ BD12061 cargado desde Google Sheets:', rows61.length, 'registros');
   } catch(e) {
+    console.warn('⚠️ BD12061 no disponible, usando datos embebidos.', e.message);
+  }
+
+  try {
+    const t05 = await fetchGviz('12205');
+    rows05 = parseRows(t05);
+    console.log('✅ 12205 cargado desde Google Sheets:', rows05.length, 'registros');
+  } catch(e) {
+    console.warn('⚠️ 12205 no disponible, usando datos embebidos para CFA12205.', e.message);
+  }
+
+  // Si al menos BD12061 se cargó, procesar datos en vivo
+  if (rows61 && rows61.length > 0) {
+    // Si 12205 no se cargó, crear array vacío para no romper el cálculo
+    if (!rows05) rows05 = [];
+    const computed = computeLiveKPIs(rows61, rows05);
+
+    // Si 12205 no estaba en Google Sheets, conservar datos embebidos para ese programa
+    if (rows05.length === 0) {
+      computed.cfa12205 = DB.cfa12205;
+      computed.status12205 = DB.status12205;
+      computed.statusPagado12205 = DB.statusPagado12205;
+      computed.statusContratado12205 = DB.statusContratado12205;
+      computed.statusPendiente12205 = DB.statusPendiente12205;
+      computed.componentes = DB.componentes;
+      // Recalcular "all" combinando live CFA12061 + embebido CFA12205
+      const t = computed.cfa12061.total + DB.cfa12205.total;
+      const e = computed.cfa12061.ejecutado + DB.cfa12205.ejecutado;
+      computed.all = {
+        total: t, ejecutado: e,
+        pct: Math.round(e / t * 1000) / 10,
+        ciclo: Math.round((computed.cfa12061.ciclo + DB.cfa12205.ciclo) / 2 * 10) / 10,
+        sup: computed.cfa12061.sup + DB.cfa12205.sup,
+        procs: computed.cfa12061.procs + DB.cfa12205.procs
+      };
+      computed.suppliers.cfa12205 = DB.suppliers.cfa12205;
+      liveStatus = 'EN VIVO (CFA12061)';
+    } else {
+      liveStatus = 'DATOS EN VIVO';
+    }
+
+    Object.assign(DB, computed);
+    applyFilters();
+    const k61 = computed.cfa12061;
+    setTimeout(() => { document.getElementById('bar1').style.width = k61.pct + '%'; }, 200);
+    if (rows05.length > 0) {
+      const k05 = computed.cfa12205;
+      setTimeout(() => { document.getElementById('bar2').style.width = k05.pct + '%'; }, 300);
+    }
+    badge.innerHTML = '<div class="live-dot"></div>' + liveStatus;
+    dateBadge.textContent = 'Actualizado: ' + new Date().toLocaleDateString('es-SV', {day:'2-digit', month:'short', year:'numeric'});
+  } else {
+    // Ninguna hoja se cargó — datos embebidos
     badge.innerHTML = '<div class="live-dot" style="background:#FF4D6D"></div>SIN CONEXIÓN';
-    console.warn('⚠️ Google Sheets no disponible. Revisa que la hoja sea pública.\nError:', e.message);
+    console.warn('⚠️ Google Sheets no disponible. Usando datos embebidos.');
   }
 }
 
